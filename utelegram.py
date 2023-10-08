@@ -12,6 +12,21 @@ import time
 import gc
 import urequests
 
+
+class TelegramMessage:
+    def __init__(self, message):
+        self._message = message
+        self.chat_id = 0
+        self.msg_text = ""
+
+        self._get_content()
+
+    def _get_content(self):
+        if 'text' in self._message['message']:
+            self.chat_id = self._message['message']['chat']['id']
+            self.msg_text = self._message['message']['text']
+
+
 class Ubot:
     def __init__(self, token, offset=0):
         self.url = 'https://api.telegram.org/bot' + token
@@ -59,34 +74,33 @@ class Ubot:
             time.sleep(self.sleep_btw_updates)
             gc.collect()
 
-    def read_once(self):
+    def read_once(self) -> TelegramMessage | None:
         gc.collect()
         messages = self.read_messages()
         if messages:
             if self.message_offset == 0:
                 self.message_offset = messages[-1]['update_id']
-                self.message_handler(messages[-1])
+                return self.message_handler(messages[-1])
             else:
                 for message in messages:
                     if message['update_id'] >= self.message_offset:
                         self.message_offset = message['update_id']
-                        self.message_handler(message)
-                        break
+                        return self.message_handler(message)
 
-    def register(self, command, handler):
+    def register(self, command, handler) -> None:
         self.commands[command] = handler
 
-    def set_default_handler(self, handler):
+    def set_default_handler(self, handler) -> None:
         self.default_handler = handler
 
     def set_sleep_btw_updates(self, sleep_time):
         self.sleep_btw_updates = sleep_time
 
-    def message_handler(self, message):
+    def message_handler(self, message) -> str | None:
         if 'text' in message['message']:
             parts = message['message']['text'].split(' ')
             if parts[0] in self.commands:
-                self.commands[parts[0]](message)
+                return self.commands[parts[0]](message)
             else:
                 if self.default_handler:
-                    self.default_handler(message)
+                    return self.default_handler(message)
