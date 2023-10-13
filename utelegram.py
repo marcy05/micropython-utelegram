@@ -18,6 +18,7 @@ class TelegramMessage:
         self._message = message
         self.chat_id = 0
         self.msg_text = ""
+        self.sender_id = 0
 
         self._get_content()
 
@@ -25,6 +26,7 @@ class TelegramMessage:
         if 'text' in self._message['message']:
             self.chat_id = self._message['message']['chat']['id']
             self.msg_text = self._message['message']['text']
+            self.sender_id = self._message['message']['from']['id']
 
 
 class Ubot:
