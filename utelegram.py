@@ -59,7 +59,7 @@ class Ubot:
             # print("Getting messages...")
             # print(f"Link: {self.url + '/getUpdates'}")
             update_messages = urequests.post(self.url + '/getUpdates', json=self.query_updates).json()
-            print(update_messages)  # Debug printing
+            # print(update_messages)  # Debug printing
             if 'result' in update_messages:
                 for item in update_messages['result']:
                     result.append(item)
